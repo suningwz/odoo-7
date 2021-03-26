@@ -1,0 +1,4 @@
+[submodule "meli_oerp"]
+	path = meli_oerp
+	url = https://github.com/ctmil/meli_oerp.git
+	branch = 14.0
