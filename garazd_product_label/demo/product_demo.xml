@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="product.product_product_12" model="product.product">
+        <field name="barcode">050001054321</field>
+    </record>
+    <record id="product.product_product_13" model="product.product">
+        <field name="name">Corner Desk Black with metal base and wooden table top, ergonomic and comfortable</field>
+    </record>
+    <record id="product.product_product_27" model="product.product">
+        <field name="name">Drawer with three panels and one lockable, on wheels, mobile and respectable</field>
+        <field name="barcode">123456789012</field>
+    </record>
+
+
+
+</odoo>
