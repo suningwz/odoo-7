@@ -1,0 +1,41 @@
+# -*- coding: utf-8 -*-
+
+{
+    'name': 'Real All in One WhatsApp - Sale Order, Invoice, Partner',
+    'summary': 'Send and receive messages. Real ChatRoom. WhatsApp integration. Send Product, Sale Order, Invoice, Partner. WhatsApp Connector. GupShup. Chat-Api. ChatApi. Drag and Drop. ChatRoom 2.0.',
+    'description': 'Send and receive messages. Real ChatRoom. WhatsApp integration. Send Product, Sale Order, Invoice and Partner. WhatsApp Connector. GupShup. Chat-Api. ChatApi. Drag and Drop. ChatRoom 2.0.',
+    'version': '14.0.1',
+    'author': 'AcruxLab',
+    'live_test_url': 'https://chatroom.acruxlab.com/web/signup',
+    'support': 'info@acruxlab.com',
+    # 'price': 0,
+    # 'currency': 'USD',
+    'images': ['static/description/Banner_full.gif'],
+    'website': 'https://acruxlab.com/whatsapp',
+    'license': 'OPL-1',
+    'application': True,
+    'installable': True,
+    'category': 'Sales',
+    'depends': [
+        'whatsapp_connector',
+        'sale_management',
+    ],
+    'data': [
+        'data/data.xml',
+        'security/ir.model.access.csv',
+        'wizard/MessageWizard.xml',
+        'wizard/SelectConversation.xml',
+        'wizard/match_existing_partner.xml',
+        'views/sale_order_views.xml',
+        'views/account_view.xml',
+        'views/acrux_chat_connector_views.xml',
+        'views/acrux_chat_conversation_views.xml',
+        'views/res_partner.xml',
+        'reports/reports.xml',
+        'reports/dashboard.xml',
+        'views/include_template.xml',
+    ],
+    'qweb': [
+        'static/src/xml/acrux_chat_template.xml',
+    ],
+}
