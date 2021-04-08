@@ -1,2 +1,2 @@
 # odoo2
-uninstalled whatsapp
+uninstalled whatsapp fully
