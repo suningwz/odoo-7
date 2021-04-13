@@ -37,7 +37,7 @@ class MercadoLibre(MercadoLibre):
         if not meli_login_id:
             user_id = "user_id" in data and data["user_id"]
             app_id = "application_id" in data and data["application_id"]
-            meli_account = request.env['mercadolibre.account'].sudo().search([('seller_id','=',user_id),('client_id','=',application_id)])
+            meli_account = request.env['mercadolibre.account'].sudo().search([('seller_id','=',user_id),('client_id','=',app_id)])
             if not meli_account:
                 return ""
 
