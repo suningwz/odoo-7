@@ -31,7 +31,8 @@ class MercadoLibre(MercadoLibre):
     def meli_notify(self, meli_login_id=None, **kw):
 
         _logger.info("Meli Notify Multiple: "+str(meli_login_id))
-
+        data = json.loads(request.httprequest.data)
+        _logger.info(data)
         if not meli_login_id:
             return ""
 
@@ -51,8 +52,7 @@ class MercadoLibre(MercadoLibre):
         #_logger.info(company.display_name)
         #_logger.info(kw)
         #_logger.info(request)
-        data = json.loads(request.httprequest.data)
-        _logger.info(data)
+
         result = meli_account.sudo().meli_notifications(data=data,meli=meli)
         if (result and "error" in result):
             return Response(result["error"],content_type='text/html;charset=utf-8',status=result["status"])
