@@ -81,17 +81,21 @@ class SaleOrder(models.Model):
 
         #seleccionar en la confirmacion del stock.picking la informacion del carrier
         #
-        if "mercadolibre_order_confirmation_hook" in config._fields and config.mercadolibre_order_confirmation_hook:
+        if "mercadolibre_order_confirmation_hook" in config._fields and config.mercadolibre_order_confirmation_hook and self.state and self.state in ['sale','done']:
             #headers = {'Accept': 'application/json', 'Content-type':'multipart/form-data'}
-            params = { "target": "order", "id": self.id }
-            #headers = {'Authorization': 'Bearer '+atok}
-            headers = {}
-            url = config.mercadolibre_order_confirmation_hook
-            #_logger.info(headers)
-            response = requests.post( url=url, json=dict(params) )
-            if response:
-                rjson = response.json()
-                _logger.info(rjson)
+            try:
+                params = { "target": "order", "id": self.id }
+                #headers = {'Authorization': 'Bearer '+atok}
+                headers = {}
+                url = config.mercadolibre_order_confirmation_hook
+                #_logger.info(headers)
+                response = requests.post( url=url, json=dict(params) )
+                if response:
+                    rjson = response.json()
+                    _logger.info(rjson)
+            except Exception as e:
+                _logger.error(e)
+                pass;
 
 
 

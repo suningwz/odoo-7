@@ -961,9 +961,9 @@ class product_product(models.Model):
                     _product_meli_id = variant.meli_id
 
                     if (variant.meli_available_quantity != variant.virtual_available):
-                        variant.product_update_stock(variant.meli_available_quantity)
+                        variant.product_update_stock(stock=variant.meli_available_quantity, meli=meli, config=config)
             else:
-                product.product_update_stock(product.meli_available_quantity)
+                product.product_update_stock(stock=product.meli_available_quantity, meli=meli, config=config )
 
         #assign envio/sin envio
         #si es (Con envio: Sí): asigna el meli_default_stock_product al producto sin envio (Con evio: No)
@@ -1011,6 +1011,67 @@ class product_product(models.Model):
             self._get_non_variant_attributes(rjson['attributes'])
 
         return {}
+
+    def product_update_stock(self, stock=False, meli=False, config=None):
+        product = self
+        uomobj = self.env[uom_model]
+        _stock = product.virtual_available
+
+        try:
+            if (stock!=False):
+                _stock = stock
+                if (_stock<0):
+                    _stock = 0
+
+            if (product.default_code):
+                product.set_bom()
+
+            if (product.meli_default_stock_product):
+                _stock = product.meli_default_stock_product._meli_available_quantity(meli=meli,config=config)
+                if (_stock<0):
+                    _stock = 0
+
+            if (1==1 and _stock>=0 and product._meli_available_quantity(meli=meli,config=config)!=_stock):
+                _logger.info("Updating stock for variant." + str(_stock) )
+                #wh = self.env['stock.location'].search([('usage','=','internal')]).id
+                wh = product._meli_get_location_id(meli_id=product.id,meli=meli,config=config)
+                _logger.info("Updating stock for variant. location: " + str(wh and wh.display_name) )
+                #product_uom_id = uomobj.search([('name','=','Unidad(es)')])
+                #if (product_uom_id.id==False):
+                #    product_uom_id = 1
+                #else:
+                #    product_uom_id = product_uom_id.id
+                product_uom_id = product.uom_id and product.uom.id
+
+                stock_inventory_fields = get_inventory_fields(product, wh)
+
+                _logger.info("stock_inventory_fields:")
+                _logger.info(stock_inventory_fields)
+                StockInventory = self.env['stock.inventory'].create(stock_inventory_fields)
+                #_logger.info("StockInventory:")
+                #_logger.info(StockInventory)
+                if (StockInventory):
+                    stock_inventory_field_line = {
+                        "product_qty": _stock,
+                        'theoretical_qty': 0,
+                        "product_id": product.id,
+                        "product_uom_id": product_uom_id,
+                        "location_id": wh,
+                        'inventory_location_id': wh,
+                        "inventory_id": StockInventory.id,
+                        #"name": "INV "+ nombre
+                        #"state": "confirm",
+                    }
+                    StockInventoryLine = self.env['stock.inventory.line'].create(stock_inventory_field_line)
+                    #print "StockInventoryLine:", StockInventoryLine, stock_inventory_field_line
+                    _logger.info("StockInventoryLine:")
+                    _logger.info(stock_inventory_field_line)
+                    if (StockInventoryLine):
+                        return_id = stock_inventory_action_done(StockInventory)
+                        _logger.info("action_done:"+str(return_id))
+        except Exception as e:
+            _logger.info("product_update_stock Exception")
+            _logger.info(e, exc_info=True)
 
     #call with product_tmpl or bind template
     def _product_post_set_basic_configuration( self, product_tmpl=None, meli=None, config=None ):
