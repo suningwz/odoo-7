@@ -1041,7 +1041,7 @@ class product_product(models.Model):
                 #    product_uom_id = 1
                 #else:
                 #    product_uom_id = product_uom_id.id
-                product_uom_id = product.uom_id and product.uom.id
+                product_uom_id = product.uom_id and product.uom_id.id
 
                 stock_inventory_fields = get_inventory_fields(product, wh)
 
