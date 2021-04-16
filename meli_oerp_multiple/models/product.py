@@ -1056,8 +1056,8 @@ class product_product(models.Model):
                         'theoretical_qty': 0,
                         "product_id": product.id,
                         "product_uom_id": product_uom_id,
-                        "location_id": wh,
-                        'inventory_location_id': wh,
+                        "location_id": wh and wh.id,
+                        'inventory_location_id': wh and wh.id,
                         "inventory_id": StockInventory.id,
                         #"name": "INV "+ nombre
                         #"state": "confirm",
