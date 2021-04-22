@@ -2,7 +2,7 @@
 
 {
     'name': 'Whatsapp Client',
-    'version': '13.0.0.1.0',
+    'version': '14.0.0.1.0',
     'license': 'OPL-1',
     'author': "Alphasoft",
     'sequence': 1,
