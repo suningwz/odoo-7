@@ -10,3 +10,4 @@ from . import company
 from . import product
 from . import stock_location
 from . import order
+from . import product_sku_rule

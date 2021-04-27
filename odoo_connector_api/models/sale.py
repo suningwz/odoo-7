@@ -40,6 +40,7 @@ class SaleOrderLine(models.Model):
     #here we must use Many2one more accurate, there is no reason to have more than one binding (more than one account and more than one item/order associated to one sale order line)
     ocapi_bindings = fields.Many2one( "ocapi.binding.sale_order_line", string="Ocapi Connection Bindings" )
 
+
 class ResPartner(models.Model):
 
     _inherit = "res.partner"

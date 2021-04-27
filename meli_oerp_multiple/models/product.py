@@ -1154,6 +1154,7 @@ class product_product(models.Model):
         target.meli_available_quantity = product._meli_available_quantity( meli_id=meli_id, meli=meli, config=config)
 
     def _product_post_set_template_configuration( self, product_tmpl=None, product=None, meli=None, config=None ):
+        warningobj = self.env['warning']
         _logger.info("_product_post_set_base_configuration: from " + str(product_tmpl)+" to:"+str(product))
         res = {}
         #product template > product variant > binding template > binding variant
@@ -1212,32 +1213,38 @@ class product_product(models.Model):
                 elif (len(at_line_id.value_ids)>1):
                     variations_candidates = True
 
-            if product.meli_brand and len(product.meli_brand) > 0:
-                attribute = { "id": "BRAND", "value_name": product.meli_brand }
-                attributes.append(attribute)
-                _logger.info(attributes)
-                product.meli_attributes = str(attributes)
+        if product.meli_brand and len(product.meli_brand) > 0:
+            attribute = { "id": "BRAND", "value_name": product.meli_brand }
+            attributes.append(attribute)
+            _logger.info(attributes)
+            product.meli_attributes = str(attributes)
 
-            if product.meli_model and len(product.meli_model) > 0:
-                attribute = { "id": "MODEL", "value_name": product.meli_model }
-                attributes.append(attribute)
-                _logger.info(attributes)
-                product.meli_attributes = str(attributes)
+        if product.meli_model and len(product.meli_model) > 0:
+            attribute = { "id": "MODEL", "value_name": product.meli_model }
+            attributes.append(attribute)
+            _logger.info(attributes)
+            product.meli_attributes = str(attributes)
 
+        if attributes:
             _logger.info(attributes)
             product.meli_attributes = str(attributes)
 
         if (not variations_candidates):
-            if (product.default_code and config.mercadolibre_post_default_code):
+            if ( (("default_code" in product._fields and product.default_code)) and config.mercadolibre_post_default_code):
                 #SKU as attribute is default now
                 attribute = { "id": "SELLER_SKU", "value_name": product.default_code }
+                attributes.append(attribute)
+                product.meli_attributes = str(attributes)
+            if ( (("sku" in product._fields and product.sku)) and config.mercadolibre_post_default_code):
+                #SKU as attribute is default now
+                attribute = { "id": "SELLER_SKU", "value_name": product.sku }
                 attributes.append(attribute)
                 product.meli_attributes = str(attributes)
 
         return attributes
 
     def _product_post_set_images( self, product_tmpl=None, product=None, meli=None, config=None ):
-
+        warningobj = self.env['warning']
         #publicando multiples imagenes
         multi_images_ids = {}
         if (variant_image_ids(product) or template_image_ids(product)):
@@ -1356,8 +1363,12 @@ class product_product(models.Model):
 
         #TODO: OBSOLETE check and set only if no variations
         #if (not variations_candidates):
-        if (product.default_code and config.mercadolibre_post_default_code):
+        if ( ("default_code" in product._fields and product.default_code) and config.mercadolibre_post_default_code):
             body["seller_custom_field"] = product.default_code
+
+        if ( (("sku" in product._fields and product.sku)) and config.mercadolibre_post_default_code):
+            #SKU as attribute is default now
+            body["seller_custom_field"] = product.sku
 
         return body, bodydescription
 
@@ -1422,6 +1433,7 @@ class product_product(models.Model):
         return { 'status': 'success', 'message': 'uploaded and assigned' }
 
     def _product_set_variations( self, product_tmpl=None, product=None, meli=None, config=None, attributes=None, productjson=None, body=None, bodydescription=None ):
+        warningobj = self.env['warning']
         if (product_tmpl.meli_pub_as_variant):
             #es probablemente la variante principal
             if (product_tmpl.meli_pub_principal_variant.id):
@@ -1574,6 +1586,7 @@ class product_product(models.Model):
 
     #special _product_post   that accept a binding variant as parameter to post...
     def _product_post( self, bind_tpl=None, bind=None, meli=None, config=None ):
+        warningobj = self.env['warning']
         context = self.env.context
         #import pdb;pdb.set_trace();
         _logger.info('[DEBUG] MercadoLibre Bind _product_post: ')
@@ -1753,7 +1766,7 @@ class product_product(models.Model):
             rjsondes = resdescription.json()
         else:
             assign_img = True and product.meli_imagen_id
-            _logger.info("first post:" + str(body))
+            _logger.info("first post:" + str(body)+" meli: login_id: "+str(meli.meli_login_id)+" client_id: "+str(meli.client_id)+" seller_id: "+str(meli.seller_id)+" access_token: "+str(meli.access_token))
             response = meli.post("/items", body, {'access_token':meli.access_token})
 
         rjson = response.json()

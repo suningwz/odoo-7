@@ -291,7 +291,7 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
             if not meli:
                 meli = self.env['meli.util'].get_new_instance( account.company_id, account )
 
-            for binv in bindT.variant_bindings:
+            for bindv in bindT.variant_bindings:
                 bindv.product_post_stock(meli=meli)
 
         return ret
@@ -584,14 +584,8 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
 
         _logger.info("bind variant >> product_get_meli_update")
 
-        account = self.connection_account
-
-        company = (account and account.company_id) or self.env.user.company_id
-
         warningobj = self.env['warning']
         product_obj = self.env['product.product']
-
-        meli = self.env['meli.util'].get_new_instance( company, account )
 
         ML_status = "unknown"
         ML_sub_status = ""
@@ -599,12 +593,16 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
         ML_state = False
         #meli = None
 
-        if meli.need_login():
-            ML_status = "unknown"
-            ML_permalink = ""
-            ML_state = True
-
         for product in self:
+
+            account = product.connection_account
+            company = (account and account.company_id) or self.env.user.company_id
+            meli = self.env['meli.util'].get_new_instance( company, account )
+            if meli.need_login():
+                ML_status = "unknown"
+                ML_permalink = ""
+                ML_state = True
+
             if product.conn_id and not product.meli_id:
                 product.meli_id = product.conn_id
 
@@ -921,11 +919,13 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
                 bindv.meli_available_quantity = product._meli_available_quantity( meli_id=meli_id, meli=meli, config=config)
                 bindv.stock = bindv.meli_available_quantity
                 if bindv.meli_inventory_id:
-                    bindv.stock_update = ml_datetime( str( datetime.now() ) )
-                    res = { "error": "fulfillment"}
-                    bindv.stock_error = str(res)
-                    _logger.info(bindv.stock_error)
-                    return res
+                    logistic_type = bindv.product_id._meli_update_logistic_type(meli_id=meli_id, meli=meli,config=config)
+                    if logistic_type and logistic_type in ["fulfillment"]:
+                        bindv.stock_update = ml_datetime( str( datetime.now() ) )
+                        res = { "error": "fulfillment"}
+                        bindv.stock_error = str(res)
+                        _logger.info(bindv.stock_error)
+                        return res
                 res = product.x_product_post_stock( context=context, meli=meli, config=config, meli_id=meli_id, meli_id_variation=meli_id_variation, target=bindv )
                 if res and 'error' in res:
                     if 'fulfillment' in str(res):
@@ -933,6 +933,7 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
                     bindv.stock_error = str(res)
                     bindv.stock_update = ml_datetime( str( datetime.now() ) )
                     return res
+                bindv.meli_inventory_id = None
                 #more than one
                 bindv.stock_error = "Ok"
                 bindv.stock_update = ml_datetime( str( datetime.now() ) )
