@@ -1270,7 +1270,7 @@ class MercadoLibreConnectionBindingSaleOrder(models.Model):
         orders_obj = self.env['mercadolibre.sale_order']
 
         if not meli:
-            meli = self.env['meli.util'].get_new_instance(company, account)
+            meli = self.env['meli.util'].get_new_instance( company, account )
 
         orders_query = "/orders/search?seller="+meli.seller_id+"&sort=date_desc"
         #TODO: "create parameter for": orders_query+= "&limit=10"
@@ -1293,8 +1293,13 @@ class MercadoLibreConnectionBindingSaleOrder(models.Model):
                 if (orders_json["paging"]["total"]==0):
                     return {}
                 else:
-                    if (orders_json["paging"]["total"]==orders_json["paging"]["limit"]):
-                        offset_next = offset + orders_json["paging"]["limit"]
+                    #if (orders_json["paging"]["total"]==orders_json["paging"]["limit"]):
+                    #    offset_next = offset + orders_json["paging"]["limit"]
+                    if (orders_json["paging"]["total"]>(offset+orders_json["paging"]["limit"])):
+                        if ((offset+orders_json["paging"]["limit"])>=351):
+                            offset_next = 0
+                        else:
+                            offset_next = offset + orders_json["paging"]["limit"]
 
         if "results" in orders_json:
             for order_json in orders_json["results"]:
