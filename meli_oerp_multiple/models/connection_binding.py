@@ -1289,6 +1289,7 @@ class MercadoLibreConnectionBindingSaleOrder(models.Model):
             return {}
 
         if "paging" in orders_json:
+            _logger.info("paging:"+str(orders_json["paging"]))
             if "total" in orders_json["paging"]:
                 if (orders_json["paging"]["total"]==0):
                     return {}
@@ -1300,6 +1301,7 @@ class MercadoLibreConnectionBindingSaleOrder(models.Model):
                             offset_next = 0
                         else:
                             offset_next = offset + orders_json["paging"]["limit"]
+                        _logger.info("offset_next:"+str(offset_next))
 
         if "results" in orders_json:
             for order_json in orders_json["results"]:
