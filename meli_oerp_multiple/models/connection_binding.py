@@ -1270,7 +1270,7 @@ class MercadoLibreConnectionBindingSaleOrder(models.Model):
         orders_obj = self.env['mercadolibre.sale_order']
 
         if not meli:
-            meli = self.env['meli.util'].get_new_instance( company, account )
+            meli = self.env['meli.util'].get_new_instance(company, account)
 
         orders_query = "/orders/search?seller="+meli.seller_id+"&sort=date_desc"
         #TODO: "create parameter for": orders_query+= "&limit=10"

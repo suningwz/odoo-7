@@ -179,6 +179,8 @@ class MercadoLibreConnectionConfiguration(models.Model):
     mercadolibre_order_confirmation_hook = fields.Char(string="Order Hook",help="https://www.hookserver.com/app")
     mercadolibre_product_confirmation_hook = fields.Char(string="Product Hook",help="https://www.hookserver.com/app")
 
+    mercadolibre_filter_order_datetime = fields.Datetime("Order Closed Date")
+
     def copy_from_company( self, context=None, company=None ):
         context = context or self.env.context
         company = company or (self.accounts and self.accounts[0].company_id) or self.env.user.company_id
