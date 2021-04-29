@@ -1288,16 +1288,15 @@ class MercadoLibreConnectionBindingSaleOrder(models.Model):
                 _logger.error( orders_json["message"] )
             return {}
 
+        order_date_filter = ("mercadolibre_filter_order_datetime" in config._fields and config.mercadolibre_filter_order_datetime)
+
         if "paging" in orders_json:
-            _logger.info("paging:"+str(orders_json["paging"]))
             if "total" in orders_json["paging"]:
                 if (orders_json["paging"]["total"]==0):
                     return {}
                 else:
-                    #if (orders_json["paging"]["total"]==orders_json["paging"]["limit"]):
-                    #    offset_next = offset + orders_json["paging"]["limit"]
-                    if (orders_json["paging"]["total"]>(offset+orders_json["paging"]["limit"])):
-                        if ((offset+orders_json["paging"]["limit"])>=351):
+                    if (orders_json["paging"]["total"]>=(offset+orders_json["paging"]["limit"])):
+                        if not order_date_filter:
                             offset_next = 0
                         else:
                             offset_next = offset + orders_json["paging"]["limit"]
