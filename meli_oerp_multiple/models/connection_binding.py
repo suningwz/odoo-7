@@ -834,6 +834,10 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
 
             if (config.mercadolibre_update_local_stock):
                 product = bind.product_id
+                _logger.info("product_update_stock: "+str(bind.stock))
+                _logger.info("product_update_stock: rjson: "+str(rjson))
+                _logger.info("meli: "+str(meli))
+                _logger.info("account: "+str(account))
                 product and product.product_update_stock(stock=bind.stock, meli_id=meli_id, meli=meli, config=config )
 
     def product_post( self, meli=None ):
