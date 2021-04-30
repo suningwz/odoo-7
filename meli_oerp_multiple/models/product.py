@@ -1012,10 +1012,11 @@ class product_product(models.Model):
 
         return {}
 
-    def product_update_stock(self, stock=False, meli=False, config=None):
+    def product_update_stock(self, stock=False, meli_id=False, meli=False, config=None):
         product = self
         uomobj = self.env[uom_model]
         _stock = product.virtual_available
+        meli_id = meli_id or product.meli_id
 
         try:
             if (stock!=False):
@@ -1026,15 +1027,16 @@ class product_product(models.Model):
             if (product.default_code):
                 product.set_bom()
 
-            if (product.meli_default_stock_product):
+            if (product.meli_default_stock_product and meli_id!=product.meli_id):
                 _stock = product.meli_default_stock_product._meli_available_quantity(meli=meli,config=config)
                 if (_stock<0):
                     _stock = 0
 
-            if (1==1 and _stock>=0 and product._meli_available_quantity(meli=meli,config=config)!=_stock):
+            if (1==1 and _stock>=0 and product._meli_available_quantity( meli_id=meli_id, meli=meli, config=config )!=_stock):
                 _logger.info("Updating stock for variant." + str(_stock) )
                 #wh = self.env['stock.location'].search([('usage','=','internal')]).id
-                wh = product._meli_get_location_id(meli_id=product.id,meli=meli,config=config)
+                #wh = product._meli_get_location_id(meli_id=product.id,meli=meli,config=config)
+                wh = product._meli_get_location_id( meli_id=meli_id, meli=meli, config=config )
                 _logger.info("Updating stock for variant. location: " + str(wh and wh.display_name) )
                 #product_uom_id = uomobj.search([('name','=','Unidad(es)')])
                 #if (product_uom_id.id==False):
