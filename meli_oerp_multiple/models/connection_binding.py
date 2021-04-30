@@ -833,7 +833,8 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
                 bind.copy_from_rjson( rjson=rjson, meli=meli )
 
             if (config.mercadolibre_update_local_stock):
-                product.product_update_stock(stock=bind.stock, meli_id=meli_id, meli=meli, config=config )
+                product = bind.product_id
+                product and product.product_update_stock(stock=bind.stock, meli_id=meli_id, meli=meli, config=config )
 
     def product_post( self, meli=None ):
         _logger.info("MercadoLibre Bind Product Post")
