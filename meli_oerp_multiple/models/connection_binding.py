@@ -297,7 +297,7 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
         return ret
 
     def product_template_update( self, meli=None ):
-        _logger.info("template product_template_update >> MercadoLibre Product template Update")
+        _logger.info("template product_template_update >> MercadoLibre Product template Update "+str(meli))
         ret = {}
         for bindT in self:
 
@@ -869,8 +869,8 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
     #    _logger.info("MercadoLibre Product template Category Predictor")
     def product_meli_get_product( self, meli=None, rjson=None ):
 
-        _logger.info("meli_oerp_multiple >> product_meli_get_product >> (Binding) MercadoLibre Product product_meli_get_product")
-
+        _logger.info("meli_oerp_multiple >> product_meli_get_product >> (Binding) MercadoLibre Product product_meli_get_product: "+str(meli))
+        _logger.info(str(rjson))
         for bind in self:
 
             account = bind.connection_account

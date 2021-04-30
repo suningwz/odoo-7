@@ -214,7 +214,7 @@ class MercadoLibreConnectionAccount(models.Model):
         account = self
         seller_sku = None
 
-        _logger.info("Fetch Meli Product: "+str(meli_id))
+        _logger.info("Fetch Meli Product: "+str(meli_id)+" account: "+str(account))
 
         if not meli:
             meli = self.env['meli.util'].get_new_instance( account.company_id, account )

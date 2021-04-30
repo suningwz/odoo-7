@@ -179,6 +179,7 @@ class product_template(models.Model):
         for productT in self:
             if not productT.mercadolibre_bindings:
                 #bind and continue
+                _logger.info("bind and continue: "+str(meli))
                 productT.mercadolibre_bind_to( account=account, meli_id=meli_id, meli=meli )
 
             for bindT in productT.mercadolibre_bindings:
