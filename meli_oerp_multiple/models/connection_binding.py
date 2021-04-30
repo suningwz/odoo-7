@@ -319,6 +319,7 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
                                                                     ('product_id','=',product.meli_pub_principal_variant.id),
                                                                     ('connection_account','=',account.id)],limit=1)
                 if pvbind:
+                    _logger.info("Founded principal binding variant: getting product: "+str(pvbind.name)+" meli: "+str(meli))
                     pvbind.product_meli_get_product( meli=meli )
                 else:
                     ret = product.meli_pub_principal_variant.product_meli_get_product( account=account, meli=meli, rjson=rjson )

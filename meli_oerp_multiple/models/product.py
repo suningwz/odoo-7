@@ -174,7 +174,7 @@ class product_template(models.Model):
         return pt_bind
 
     def product_template_update( self, meli_id=None, meli=None, account=None ):
-        _logger.info("product.template >> product_template_update meli_id: "+str(meli_id)+" account: "+str(account))
+        _logger.info("product.template >> product_template_update meli_id: "+str(meli_id)+" account: "+str(account)+" meli: "+str(meli))
         res = {}
         for productT in self:
             if not productT.mercadolibre_bindings:
@@ -183,6 +183,7 @@ class product_template(models.Model):
                 productT.mercadolibre_bind_to( account=account, meli_id=meli_id, meli=meli )
 
             for bindT in productT.mercadolibre_bindings:
+                _logger.info("Update bindings: bindT:"+str(bindT))
                 res = bindT.product_template_update( meli=meli )
                 if 'name' in res:
                     return res
