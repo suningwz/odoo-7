@@ -465,8 +465,8 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
                     for pv_bind in pv_bindings:
                         try:
                             pv_bind.fetch_meli_product( meli = meli, rjson = rjson, from_meli_oerp = from_meli_oerp )
-                        except:
-                            _logger.error("Error fetching variant product binding: "+str(pv_bind))
+                        except Exception as e:
+                            _logger.error("Error fetching variant product binding: "+str(pv_bind)+str(e))
                 else:
                     _logger.error("Missing variant bindings to fetch meli data")
 
