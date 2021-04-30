@@ -800,6 +800,7 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
                 'sku': seller_sku or '',
                 'barcode': barcode or '',
                 'meli_id_variation': bind.conn_variation_id,
+                'stock': rjson['available_quantity']
                 #'meli_imagen_link': rjson['thumbnail'],
                 #'meli_video': str(vid),
                 #'meli_dimensions': meli_dim_str,
