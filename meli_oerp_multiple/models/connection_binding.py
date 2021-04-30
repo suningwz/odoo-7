@@ -417,7 +417,8 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
                 'meli_category': catid,
                 'meli_ids': meli_ids,
                 'sku': seller_sku or "",
-                'barcode': barcode or ""
+                'barcode': barcode or "",
+                'stock': rjson['available_quantity']
                 #'meli_imagen_link': rjson['thumbnail'],
                 #'meli_video': str(vid),
                 #'meli_dimensions': meli_dim_str,
@@ -799,8 +800,7 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
                 'meli_id': rjson["id"],
                 'sku': seller_sku or '',
                 'barcode': barcode or '',
-                'meli_id_variation': bind.conn_variation_id,
-                'stock': rjson['available_quantity']
+                'meli_id_variation': bind.conn_variation_id
                 #'meli_imagen_link': rjson['thumbnail'],
                 #'meli_video': str(vid),
                 #'meli_dimensions': meli_dim_str,
