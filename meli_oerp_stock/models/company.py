@@ -43,7 +43,14 @@ class ResCompany(models.Model):
     mercadolibre_stock_warehouse_full = fields.Many2one("stock.warehouse", string="Stock Warehouse Default for FULL", help="Almacen predeterminado para modo fulfillment")
     mercadolibre_stock_location_to_post_full = fields.Many2one("stock.location", string="Stock Location To Post for Full", help="Ubicación desde dónde publicar el stock en modo Full")
 
+    #TODO: activate
     #mercadolibre_stock_virtual_available = fields.Selection([("virtual","Virtual (quantity-reserved)"),("theoretical","En mano (quantity)")],default='virtual')
+
+    #TODO: activate
+    #mercadolibre_stock_sku_regex = fields.Char(string="Sku Regex")
+
+    #TODO: activate
+    #mercadolibre_stock_sku_mapping = fields.Text(string="Sku mapping")
 
     #TODO:
     #si shipped que haga automaticamente ejecute la entrega

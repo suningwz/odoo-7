@@ -38,6 +38,9 @@
 	    #'views/shipment_view.xml',
 	    #'views/notifications_view.xml'
     ],
+    'price': '1.00',
+    'currency': 'USD',
+    'license': 'GPL-3',
     #"external_dependencies": {"python": ['pdf2image']},
     'demo_xml': [],
     'active': False,

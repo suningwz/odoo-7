@@ -23,6 +23,7 @@
                   <field name="conn_id"/>
                   <field name="price" />
                   <field name="stock" />
+                  <field name="meli_shipping_logistic_type"/>
                 </group>
               </group>
               <!--label for="sale_ok" position="after">
@@ -147,6 +148,7 @@
                 <field name="conn_variation_id"/>
                 <field name="price" />
                 <field name="stock" />
+                <field name="meli_shipping_logistic_type"/>
               </group>
               <br/>
               <!--label for="sale_ok" position="after">
@@ -319,6 +321,7 @@
                             <field name="conn_variation_id"  string="Variant Id"/>
                             <field name="price"/>
                             <field name="stock"/>
+                            <field name="meli_shipping_logistic_type"/>
                           </tree>
                       </field>
 										</page>
@@ -368,6 +371,7 @@
                             <field name="conn_variation_id"  string="Variant Id"/>
                             <field name="price"/>
                             <field name="stock"/>
+                            <field name="meli_shipping_logistic_type"/>
                           </tree>
                       </field>
                     </page>

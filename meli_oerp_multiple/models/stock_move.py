@@ -20,6 +20,7 @@ class stock_move(models.Model):
         #_logger.info("meli_oerp_stock >> stock.move _action_done ")
         super( stock_move, self)._action_done(cancel_backorder=cancel_backorder)
         _logger.info("meli_oerp_multiple >> stock.move _action_done OK. Posting Job Notification ")
+        return
         try:
             model_ids = []
             for st in self:

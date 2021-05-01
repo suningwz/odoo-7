@@ -291,13 +291,13 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
             if not meli:
                 meli = self.env['meli.util'].get_new_instance( account.company_id, account )
 
-            for binv in bindT.variant_bindings:
+            for bindv in bindT.variant_bindings:
                 bindv.product_post_stock(meli=meli)
 
         return ret
 
     def product_template_update( self, meli=None ):
-        _logger.info("template product_template_update >> MercadoLibre Product template Update")
+        _logger.info("template product_template_update >> MercadoLibre Product template Update "+str(meli))
         ret = {}
         for bindT in self:
 
@@ -319,6 +319,7 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
                                                                     ('product_id','=',product.meli_pub_principal_variant.id),
                                                                     ('connection_account','=',account.id)],limit=1)
                 if pvbind:
+                    _logger.info("Founded principal binding variant: getting product: "+str(pvbind.name)+" meli: "+str(meli))
                     pvbind.product_meli_get_product( meli=meli )
                 else:
                     ret = product.meli_pub_principal_variant.product_meli_get_product( account=account, meli=meli, rjson=rjson )
@@ -416,7 +417,8 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
                 'meli_category': catid,
                 'meli_ids': meli_ids,
                 'sku': seller_sku or "",
-                'barcode': barcode or ""
+                'barcode': barcode or "",
+                'stock': rjson['available_quantity']
                 #'meli_imagen_link': rjson['thumbnail'],
                 #'meli_video': str(vid),
                 #'meli_dimensions': meli_dim_str,
@@ -465,8 +467,8 @@ class MercadoLibreConnectionBindingProductTemplate(models.Model):
                     for pv_bind in pv_bindings:
                         try:
                             pv_bind.fetch_meli_product( meli = meli, rjson = rjson, from_meli_oerp = from_meli_oerp )
-                        except:
-                            _logger.error("Error fetching variant product binding: "+str(pv_bind))
+                        except Exception as e:
+                            _logger.error("Error fetching variant product binding: "+str(pv_bind)+str(e))
                 else:
                     _logger.error("Missing variant bindings to fetch meli data")
 
@@ -584,14 +586,8 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
 
         _logger.info("bind variant >> product_get_meli_update")
 
-        account = self.connection_account
-
-        company = (account and account.company_id) or self.env.user.company_id
-
         warningobj = self.env['warning']
         product_obj = self.env['product.product']
-
-        meli = self.env['meli.util'].get_new_instance( company, account )
 
         ML_status = "unknown"
         ML_sub_status = ""
@@ -599,12 +595,16 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
         ML_state = False
         #meli = None
 
-        if meli.need_login():
-            ML_status = "unknown"
-            ML_permalink = ""
-            ML_state = True
-
         for product in self:
+
+            account = product.connection_account
+            company = (account and account.company_id) or self.env.user.company_id
+            meli = self.env['meli.util'].get_new_instance( company, account )
+            if meli.need_login():
+                ML_status = "unknown"
+                ML_permalink = ""
+                ML_state = True
+
             if product.conn_id and not product.meli_id:
                 product.meli_id = product.conn_id
 
@@ -800,7 +800,7 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
                 'meli_id': rjson["id"],
                 'sku': seller_sku or '',
                 'barcode': barcode or '',
-                'meli_id_variation': bind.conn_variation_id,
+                'meli_id_variation': bind.conn_variation_id
                 #'meli_imagen_link': rjson['thumbnail'],
                 #'meli_video': str(vid),
                 #'meli_dimensions': meli_dim_str,
@@ -818,6 +818,7 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
         for bind in self:
 
             account = bind.connection_account
+            config = account and account.configuration
             meli_id = bind.conn_id
             meli_id_variation = bind.conn_variation_id
 
@@ -832,6 +833,14 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
             else:
                 rjson = rjson or account.fetch_meli_product( meli_id=meli_id, meli=meli )
                 bind.copy_from_rjson( rjson=rjson, meli=meli )
+
+            if (config.mercadolibre_update_local_stock):
+                product = bind.product_id
+                _logger.info("product_update_stock: "+str(bind.stock))
+                _logger.info("product_update_stock: rjson: "+str(rjson))
+                _logger.info("meli: "+str(meli))
+                _logger.info("account: "+str(account))
+                product and product.product_update_stock(stock=bind.stock, meli_id=meli_id, meli=meli, config=config )
 
     def product_post( self, meli=None ):
         _logger.info("MercadoLibre Bind Product Post")
@@ -862,8 +871,8 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
     #    _logger.info("MercadoLibre Product template Category Predictor")
     def product_meli_get_product( self, meli=None, rjson=None ):
 
-        _logger.info("meli_oerp_multiple >> product_meli_get_product >> (Binding) MercadoLibre Product product_meli_get_product")
-
+        _logger.info("meli_oerp_multiple >> product_meli_get_product >> (Binding) MercadoLibre Product product_meli_get_product: "+str(meli))
+        _logger.info(str(rjson))
         for bind in self:
 
             account = bind.connection_account
@@ -921,11 +930,13 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
                 bindv.meli_available_quantity = product._meli_available_quantity( meli_id=meli_id, meli=meli, config=config)
                 bindv.stock = bindv.meli_available_quantity
                 if bindv.meli_inventory_id:
-                    bindv.stock_update = ml_datetime( str( datetime.now() ) )
-                    res = { "error": "fulfillment"}
-                    bindv.stock_error = str(res)
-                    _logger.info(bindv.stock_error)
-                    return res
+                    logistic_type = bindv.product_id._meli_update_logistic_type(meli_id=meli_id, meli=meli,config=config)
+                    if logistic_type and logistic_type in ["fulfillment"]:
+                        bindv.stock_update = ml_datetime( str( datetime.now() ) )
+                        res = { "error": "fulfillment"}
+                        bindv.stock_error = str(res)
+                        _logger.info(bindv.stock_error)
+                        return res
                 res = product.x_product_post_stock( context=context, meli=meli, config=config, meli_id=meli_id, meli_id_variation=meli_id_variation, target=bindv )
                 if res and 'error' in res:
                     if 'fulfillment' in str(res):
@@ -933,6 +944,7 @@ class MercadoLibreConnectionBindingProductVariant(models.Model):
                     bindv.stock_error = str(res)
                     bindv.stock_update = ml_datetime( str( datetime.now() ) )
                     return res
+                bindv.meli_inventory_id = None
                 #more than one
                 bindv.stock_error = "Ok"
                 bindv.stock_update = ml_datetime( str( datetime.now() ) )
@@ -1287,13 +1299,19 @@ class MercadoLibreConnectionBindingSaleOrder(models.Model):
                 _logger.error( orders_json["message"] )
             return {}
 
+        order_date_filter = ("mercadolibre_filter_order_datetime" in config._fields and config.mercadolibre_filter_order_datetime)
+
         if "paging" in orders_json:
             if "total" in orders_json["paging"]:
                 if (orders_json["paging"]["total"]==0):
                     return {}
                 else:
-                    if (orders_json["paging"]["total"]==orders_json["paging"]["limit"]):
-                        offset_next = offset + orders_json["paging"]["limit"]
+                    if (orders_json["paging"]["total"]>=(offset+orders_json["paging"]["limit"])):
+                        if not order_date_filter:
+                            offset_next = 0
+                        else:
+                            offset_next = offset + orders_json["paging"]["limit"]
+                        _logger.info("offset_next:"+str(offset_next))
 
         if "results" in orders_json:
             for order_json in orders_json["results"]:

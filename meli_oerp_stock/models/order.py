@@ -26,6 +26,9 @@ _logger = logging.getLogger(__name__)
 
 import pdb
 import requests
+import re
+
+from .product_sku_rule import *
 
 class SaleOrder(models.Model):
 
@@ -81,3 +84,64 @@ class MercadolibreOrder(models.Model):
 
         if self.sale_order:
             self.sale_order._meli_order_update(config=config)
+
+    #mapping procedure params: sku or item
+    def map_meli_sku( self, meli_sku=None, meli_item=None ):
+        _logger.info("map_meli_sku: "+str(meli_item))
+        odoo_sku = None
+        mapped = None
+        filtered = None
+        seller_sku = meli_sku or (meli_item and 'seller_sku' in meli_item and meli_item['seller_sku']) or (meli_item and 'seller_custom_field' in meli_item and meli_item['seller_custom_field'])
+
+        if seller_sku:
+            #mapped skus (json dict string assigned)
+            if mapping_meli_sku_regex:
+                for reg in mapping_meli_sku_regex:
+                    rules = mapping_meli_sku_regex[reg]
+                    for rule in rules:
+                        regex = "regex" in rule and rule["regex"]
+                        if regex and not filtered:
+                            group = "group" in rule and rule["group"]
+                            c = re.compile(regex)
+                            if c:
+                                ms = c.findall(seller_sku)
+                                if ms:
+                                    if len(ms)>group:
+                                        m = ms[group]
+                                        filtered = m
+                                        _logger.info("filtered ok: regex: "+str(rule)+" result: "+str(m))
+                                        break;
+
+            mapped_sku = (mapping_meli_sku_defaut_code and seller_sku in mapping_meli_sku_defaut_code and mapping_meli_sku_defaut_code[seller_sku])
+            odoo_sku = mapped_sku or filtered or seller_sku
+
+        if mapped_sku:
+            _logger.info("map_meli_sku(): meli_sku: "+str(seller_sku)+" mapped to: "+str(odoo_sku))
+
+        return odoo_sku
+
+    #extended from mercadolibre.orders: SKU formulas
+    def _search_meli_product( self, meli=None, meli_item=None, config=None ):
+        _logger.info("search_meli_product extended: "+str(meli_item))
+        product_related = super(MercadolibreOrder, self).search_meli_product( meli=meli, meli_item=meli_item, config=config )
+
+        product_obj = self.env['product.product']
+        if ( len(product_related)==0 and ('seller_custom_field' in meli_item or 'seller_sku' in meli_item)):
+
+            #Mapping meli sku to odoo sku
+            meli_item["seller_sku"] = self.map_meli_sku( meli_item=meli_item )
+
+            #1ST attempt "seller_sku" or "seller_custom_field"
+            seller_sku = ('seller_sku' in meli_item and meli_item['seller_sku']) or ('seller_custom_field' in meli_item and meli_item['seller_custom_field'])
+            if (seller_sku):
+                product_related = product_obj.search([('default_code','=',seller_sku)])
+
+            #2ND attempt only old "seller_custom_field"
+            if (not product_related and 'seller_custom_field' in meli_item):
+                seller_sku = ('seller_custom_field' in meli_item and meli_item['seller_custom_field'])
+            if (seller_sku):
+                product_related = product_obj.search([('default_code','=',seller_sku)])
+
+        #product_obj = self.env['product.product']
+
+        return product_related
