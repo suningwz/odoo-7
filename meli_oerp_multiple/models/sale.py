@@ -368,7 +368,8 @@ class mercadolibre_shipment(models.Model):
         config = (account and account.configuration) or company
         #order by account
         if account:
-            if not meli or (meli.meli_login_id==account.meli_login_id):
+            _logger.info("meli:"+str(meli.meli_login_id)+"account:"+str(account.name))
+            if not meli or not (meli.meli_login_id==account.meli_login_id):
                 meli = self.env['meli.util'].get_new_instance( account.company_id, account )
             return super(mercadolibre_shipment,self).shipment_print(  meli=meli, config=config, include_ready_to_print=include_ready_to_print )
 
