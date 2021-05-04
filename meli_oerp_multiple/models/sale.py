@@ -354,3 +354,26 @@ class ResPartner(models.Model):
     #several possible relations? we really dont know for sure, how to not duplicate clients from different platforms
     #besides, is there a way to identify duplicates other than integration ids
     mercadolibre_bindings = fields.Many2many( "mercadolibre.client", string="MercadoLibre Connection Bindings" )
+
+class mercadolibre_shipment(models.Model):
+    
+    _inherit = "mercadolibre.shipment"
+    
+    def shipment_print( self, meli=None, config=None, include_ready_to_print=None ):
+        
+        shipment = self
+        order = shipment.orders and shipment.orders[0]
+        account = order and order.connection_account
+        company = (account and account.company_id) or self.env.user.company_id
+        config = (account and account.configuration) or company
+        #order by account
+        if account:
+            if not meli or (meli.meli_login_id==account.meli_login_id):
+                meli = self.env['meli.util'].get_new_instance( account.company_id, account )
+            return super(mercadolibre_shipment,self).shipment_print(  meli=meli, config=config, include_ready_to_print=include_ready_to_print )
+
+        return super(mercadolibre_shipment,self).shipment_print( meli=meli, config=config, include_ready_to_print=include_ready_to_print )
+        
+
+        
+        
